@@ -24,42 +24,41 @@ repositories {
 }
 
 dependencies {
-    dependencies {
-        // JPA
-        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-        // SECURITY
-        implementation 'org.springframework.boot:spring-boot-starter-security'
+    // SECURITY
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
-        // WEB
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+    // WEB
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
-        // LOMBOK
-        compileOnly 'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
+    // LOMBOK
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-        // MySQL
-        runtimeOnly 'com.mysql:mysql-connector-j'
+    // MySQL
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
-        // Validation
-        implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-        // JWT
-        compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
-        runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
-        runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+    // JWT
+    compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
 
-        // DEV_TOOL
-        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    // DEV_TOOL
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-        // TEST
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-        testCompileOnly 'org.projectlombok:lombok'
-        testCompileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation 'org.springframework.security:spring-security-test'
-    }
+    // TEST
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testCompileOnly 'org.projectlombok:lombok'
+    testCompileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
 
-    tasks.named('test') {
-        useJUnitPlatform()
-    }
+tasks.named('test') {
+    useJUnitPlatform()
+}

@@ -1,35 +1,67 @@
-import model.Schedule;
-import service.ScheduleService;
 
-import java.time.LocalDate;
+package com.example.schedulepj.controller;
+
+import com.example.schedulepj.dto.PasswordRequestDto;
+import com.example.schedulepj.dto.ScheduleRequestDto;
+import com.example.schedulepj.dto.ScheduleResponseDto;
+import com.example.schedulepj.dto.ScheduleUpdateRequestDto;
+import com.example.schedulepj.service.ScheduleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import java.util.Optional;
 
+@RestController
+@RequestMapping("/api/schedules")
 public class ScheduleController {
-    private final ScheduleService service;
 
-    public ScheduleController(ScheduleService service) {
-        this.service = service;
+    private final ScheduleService scheduleService;
+
+    @Autowired
+    public ScheduleController(ScheduleService scheduleService) {
+        this.scheduleService = scheduleService;
     }
 
-    public Schedule addSchedule(String task, String author, String password) {
-        return service.createSchedule(task, author, password);
+    // 일정 생성
+    @PostMapping
+    public ResponseEntity<ScheduleResponseDto> createSchedule(@RequestBody ScheduleRequestDto requestDto) {
+        ScheduleResponseDto responseDto = scheduleService.createSchedule(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    public List<Schedule> viewSchedules(String dateStr, String author) {
-        LocalDate date = (dateStr == null || dateStr.isBlank()) ? null : LocalDate.parse(dateStr);
-        return service.getAllSchedules(date, author);
+    // 전체 일정 조회
+    @GetMapping
+    public ResponseEntity<List<ScheduleResponseDto>> getAllSchedules(
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String author) {
+        List<ScheduleResponseDto> responseDtos = scheduleService.getAllSchedules(date, author);
+        return ResponseEntity.ok(responseDtos);
     }
 
-    public Optional<Schedule> viewSchedule(long id) {
-        return service.getSchedule(id);
+    // 선택 일정 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<ScheduleResponseDto> getSchedule(@PathVariable Long id) {
+        ScheduleResponseDto responseDto = scheduleService.getSchedule(id);
+        return ResponseEntity.ok(responseDto);
     }
 
-    public boolean editSchedule(long id, String task, String author, String password) {
-        return service.updateSchedule(id, task, author, password);
+    // 일정 수정
+    @PutMapping("/{id}")
+    public ResponseEntity<ScheduleResponseDto> updateSchedule(
+            @PathVariable Long id,
+            @RequestBody ScheduleUpdateRequestDto requestDto) {
+        ScheduleResponseDto responseDto = scheduleService.updateSchedule(id, requestDto);
+        return ResponseEntity.ok(responseDto);
     }
 
-    public boolean removeSchedule(long id, String password) {
-        return service.deleteSchedule(id, password);
+    // 일정 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSchedule(
+            @PathVariable Long id,
+            @RequestBody PasswordRequestDto passwordDto) {
+        scheduleService.deleteSchedule(id, passwordDto.getPassword());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -10,7 +10,6 @@ public class ScheduleResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
-    // Entity -> DTO 변환 생성자
     public ScheduleResponseDto(Schedule schedule) {
         this.id = schedule.getId();
         this.todo = schedule.getTodo();

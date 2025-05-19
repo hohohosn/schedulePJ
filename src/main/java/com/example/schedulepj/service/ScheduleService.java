@@ -1,51 +1,86 @@
-package service;
 
-import model.Schedule;
-import repository.ScheduleRepository;
-import java.time.LocalDate;
+package com.example.schedulepj.service;
+
+import com.example.schedulepj.dto.ScheduleRequestDto;
+import com.example.schedulepj.dto.ScheduleResponseDto;
+import com.example.schedulepj.dto.ScheduleUpdateRequestDto;
+import com.example.schedulepj.entity.ScheduleEntity;
+import com.example.schedulepj.repository.ScheduleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
+@Service
 public class ScheduleService {
-    private final ScheduleRepository repository;
 
-    public ScheduleService(ScheduleRepository repository) {
-        this.repository = repository;
+    private final ScheduleRepository scheduleRepository;
+
+    @Autowired
+    public ScheduleService(ScheduleRepository scheduleRepository) {
+        this.scheduleRepository = scheduleRepository;
     }
 
-    public Schedule createSchedule(String task, String author, String password) {
-        Schedule schedule = new Schedule(task, author, password);
-        repository.save(schedule);
-        return schedule;
+    // 일정 생성
+    public ScheduleResponseDto createSchedule(ScheduleRequestDto requestDto) {
+        Schedule schedule = new Schedule(
+                requestDto.getTodo(),
+                requestDto.getAuthor(),
+                requestDto.getPassword()
+        );
+
+        Schedule savedSchedule = scheduleRepository.save(schedule);
+        return new ScheduleResponseDto(savedSchedule);
     }
 
-    public List<Schedule> getAllSchedules(LocalDate date, String author) {
-        return repository.filterByDateAndAuthor(date, author);
+    // 전체 일정 조회
+    public List<ScheduleResponseDto> getAllSchedules(String date, String author) {
+        List<Schedule> schedules = scheduleRepository.findAll(date, author);
+        return schedules.stream()
+                .map(ScheduleResponseDto::new)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Schedule> getSchedule(long id) {
-        return repository.findById(id);
+    public ScheduleResponseDto getSchedule(Long id) {
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "일정을 찾을 수 없습니다."));
+        return new ScheduleResponseDto(schedule);
     }
 
-    public boolean updateSchedule(long id, String task, String author, String password) {
-        Optional<Schedule> opt = repository.findById(id);
-        if (opt.isPresent() && opt.get().getPassword().equals(password)) {
-            Schedule s = opt.get();
-            s.setTask(task);
-            s.setAuthor(author);
-            s.setModifiedAt(LocalDateTime.now());
-            return true;
+    // 일정 수정
+    public ScheduleResponseDto updateSchedule(Long id, ScheduleUpdateRequestDto requestDto) {
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "일정을 찾을 수 없습니다."));
+
+        // 비밀번호 확인
+        if (!schedule.getPassword().equals(requestDto.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
         }
-        return false;
+
+        // 일정 내용 수정
+        schedule.setTodo(requestDto.getTodo());
+        schedule.setAuthor(requestDto.getAuthor());
+        schedule.setModifiedAt(LocalDateTime.now());
+
+        scheduleRepository.update(schedule);
+
+        return new ScheduleResponseDto(schedule);
     }
 
-    public boolean deleteSchedule(long id, String password) {
-        Optional<Schedule> opt = repository.findById(id);
-        if (opt.isPresent() && opt.get().getPassword().equals(password)) {
-            repository.delete(id);
-            return true;
+    // 일정 삭제
+    public void deleteSchedule(Long id, String password) {
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "일정을 찾을 수 없습니다."));
+
+        // 비밀번호 확인
+        if (!schedule.getPassword().equals(password)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
         }
-        return false;
+
+        scheduleRepository.delete(id);
     }
 }
